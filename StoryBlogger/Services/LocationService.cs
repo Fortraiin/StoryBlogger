@@ -1,14 +1,15 @@
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
 using System.Text.Json;
+using static System.Environment;
 
 public class LocationService
 {
     private readonly string _azureMapsApiKey;
 
-    public LocationService(IConfiguration config)
+    public LocationService()
     {
-        _azureMapsApiKey = config.GetSection("Location")["AzureMapsApiKey"];
+        _azureMapsApiKey = GetEnvironmentVariable("AZURE_MAPS_KEY");
     }
 
     public async Task<string> GetStreetNameAsync(string coordinates)

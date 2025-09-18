@@ -18,8 +18,8 @@ namespace StoryBlogger.Pages
         public async Task OnGetAsync()
         {
             var exifService = new ExifService();
-            var locationService = new LocationService(_config);
-            var albumMetadata = await exifService.ExtractAlbumMetadata("wwwroot/uploadedAlbum", locationService);
+            var locationService = new LocationService();
+            var albumMetadata = await exifService.ExtractAlbumMetadata("wwwroot/images/UploadedAlbum", locationService);
 
             var promptBuilder = new PromptBuilder();
             var prompt = promptBuilder.BuildPrompt(albumMetadata);

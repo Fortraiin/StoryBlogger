@@ -7,7 +7,7 @@ public class PromptBuilder
         var tags = string.Join(", ", albumMetadata.SelectMany(m => m.Tags).Distinct());
         var people = string.Join(", ", albumMetadata.SelectMany(m => m.People).Distinct());
 
-        return $"Write a creative narrative under 200 words about an event or trip based on these photos. " +
+        return $"Write a creative narrative under 300 words about an event or trip based on these photos. " +
                $"Locations: {locations}. Dates: {dates}. Tags: {tags}. People: {people}. " +
                $"Focus on the experience, people involved, and the story these photos tell.";
     }

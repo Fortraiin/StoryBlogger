@@ -1,36 +1,41 @@
-using System.Text.Json;
+using Azure;
+using Azure.AI.OpenAI;
+using OpenAI.Chat;
+using static System.Environment;
 
 public class OpenAIService
 {
-    private readonly AzureOpenAISettings _settings;
+    private readonly string endpoint;
+    private readonly string deploymentName;
+    private readonly string apiVersion;
+    private readonly string apiKey;
 
     public OpenAIService(IConfiguration config)
     {
-        _settings = config.GetSection("AzureOpenAI").Get<AzureOpenAISettings>();
+        var section = config.GetSection("AzureOpenAI");
+        endpoint = section.GetValue<string>("Endpoint");
+        deploymentName = section.GetValue<string>("DeploymentName");
+        apiVersion = section.GetValue<string>("ApiVersion");
+        apiKey = GetEnvironmentVariable("AZURE_OPENAI_KEY");
     }
 
     public async Task<string> GenerateStoryAsync(string prompt)
     {
-        using var client = new HttpClient();
-        client.DefaultRequestHeaders.Add("api-key", _settings.ApiKey);
+        AzureOpenAIClient client = new (new Uri(endpoint), new AzureKeyCredential(apiKey));
+        ChatClient chatClient = client.GetChatClient(deploymentName);
 
-        var requestBody = new
+        var requestOptions = new ChatCompletionOptions()
         {
-            messages = new[]
-            {
-                new { role = "system", content = "You are a creative storyteller." },
-                new { role = "user", content = prompt }
-            },
-            max_tokens = 300,
-            temperature = 0.7
+            Temperature = 1,
         };
 
-        var response = await client.PostAsJsonAsync(
-            $"{_settings.Endpoint}openai/deployments/{_settings.DeploymentName}/chat/completions?api-version={_settings.ApiVersion}",
-            requestBody
-        );
+        List<ChatMessage> messages = new List<ChatMessage>()
+        {
+            new SystemChatMessage("You are a creative storyteller tasked to look at the available images and write a narrative about them."),
+            new UserChatMessage(prompt),
+        };
 
-        var result = await response.Content.ReadFromJsonAsync<JsonElement>();
-        return result.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
+        var response = chatClient.CompleteChat(messages, requestOptions);
+        return response.Value.Content[0].Text;
     }
 }

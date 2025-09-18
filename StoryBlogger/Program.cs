@@ -10,8 +10,6 @@ var config = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
     .Build();
 
-var azureOpenAISettings = config.GetSection("AzureOpenAI").Get<AzureOpenAISettings>();
-
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
